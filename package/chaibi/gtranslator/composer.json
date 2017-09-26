@@ -1,0 +1,20 @@
+{
+  "name": "chaibi/gtranslator",
+  "description": "Google Translation for Laravel",
+  "authors": [
+    {
+      "name": "Chaibi Alaa",
+      "email": "ceo@bluepenlabs.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": "~5.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "chaibi\\gtranslator\\": "src/"
+    }
+  }
+}
