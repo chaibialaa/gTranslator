@@ -64,7 +64,24 @@ class Command extends ConsoleCommand
                     foreach ($translationQueue as $item=>$value){
                         $this->info('Translating ' . '\'' . $item . '\'');
                         if(is_array($value)){
-                            break;
+                            foreach ($value as $itemS=>$valueS){
+                                $this->info('Translating ' . '\'' . $itemS . '\'');
+                                if(is_array($valueS)){
+                                    foreach ($valueS as $itemD=>$valueD){
+                                        $this->info('Translating ' . '\'' . $itemD . '\'');
+                                        if(is_array($valueD)){
+                                            $this->error('Unable to translate more than 3 levels arrays, passing to next');
+                                            break;
+                                        }
+                                        $translatedWord = str_replace('\'','\\\'',(string)self::translate($valueD,$to,$from));
+                                        $translated = $translated . '\'' . $itemD . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
+                                        sleep(1);
+                                    }
+                                }
+                                $translatedWord = str_replace('\'','\\\'',(string)self::translate($valueS,$to,$from));
+                                $translated = $translated . '\'' . $itemS . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
+                                sleep(1);
+                            }
                         }
                         $translatedWord = str_replace('\'','\\\'',(string)self::translate($value,$to,$from));
                         $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
