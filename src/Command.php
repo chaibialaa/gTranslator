@@ -2,10 +2,10 @@
 
 namespace Chaibi\gTranslator;
 
-use Illuminate\Console\Command;
+use Illuminate\Console\Command as ConsoleCommand;
 use Illuminate\Support\Facades\Lang;
 
-class gTranslatorCommand extends Command
+class Command extends ConsoleCommand
 {
     /**
      * The name and signature of the console command.

@@ -2,9 +2,9 @@
 
 namespace Chaibi\gTranslator;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;;
 
-class gTranslatorServiceProvider extends ServiceProvider
+class ServiceProvider extends IlluminateServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -14,12 +14,12 @@ class gTranslatorServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/config/gTranslator.php' => config_path('gTranslator.php'),
+            __DIR__.'../config/gTranslator.php' => config_path('gTranslator.php'),
         ]);
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                gTranslatorCommand::class
+                Command::class
             ]);
         }
     }
