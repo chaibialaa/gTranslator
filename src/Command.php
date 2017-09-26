@@ -48,7 +48,9 @@ class Command extends ConsoleCommand
 
     public function start($to, $from){
         $translation = config('gTranslator.directories');
-
+        if($translation === null){
+            $translation =  __DIR__.'/../config/gTranslator.php';
+        }
         foreach($translation as $key=>$directory){
             $dir = base_path().'/'.$directory.'/'.$from.'/';
             $translationFiles = scandir($dir, 1);
@@ -61,6 +63,9 @@ class Command extends ConsoleCommand
                     $this->info('----- TRANSLATING ' .$fileName . ' -----');
                     foreach ($translationQueue as $item=>$value){
                         $this->info('Translating ' . '\'' . $item . '\'');
+                        if(is_array($value)){
+                            break;
+                        }
                         $translatedWord = str_replace('\'','\\\'',(string)self::translate($value,$to,$from));
                         $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                         sleep(1);

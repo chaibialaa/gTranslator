@@ -14,7 +14,7 @@ class ServiceProvider extends IlluminateServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'../config/gTranslator.php' => config_path('gTranslator.php'),
+            __DIR__.'/../config/gTranslator.php' => config_path('gTranslator.php'),
         ]);
 
         if ($this->app->runningInConsole()) {
