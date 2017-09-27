@@ -1,7 +1,7 @@
 {
   "name": "chaibi/gtranslator",
   "description": "Google Translation for Laravel",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "authors": [
     {
       "name": "Chaibi Alaa",
