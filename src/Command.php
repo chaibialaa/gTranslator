@@ -45,7 +45,7 @@ class Command extends ConsoleCommand
      * @var string $line
      */
     public $line;
-    
+
     /**
      * Execute the console command.
      *
@@ -56,10 +56,10 @@ class Command extends ConsoleCommand
 
         $this->from =  $this->ask('From which language ?', config('app.locale'));
         $this->to = $this->ask('To which language ?', config('app.fallback_locale'));
-        
+
         $result = $this->translate();
 
-        return $this->info($result);
+        $this->info($result);
     }
 
     public function translate(){
@@ -113,10 +113,10 @@ class Command extends ConsoleCommand
                 $this->error('Unable to translate arrays, passing to next');
             } else {
                 if(strpos($value,':')){
-                    $translatedWord = self::translateWithParameters($value);
+                    $translatedWord = $this->translateWithParameters($value);
                     $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                 } else {
-                    $translatedWord = str_replace('\'','\\\'',(string)self::translate($value));
+                    $translatedWord = str_replace('\'','\\\'',(string)$this->googleTranslation($value));
                     $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                 }
                 sleep(1);
@@ -124,10 +124,10 @@ class Command extends ConsoleCommand
         }
         return $translated;
     }
-    public static function translateWithParameters($value){
-        preg_match('/:\S+/', $value, $matches);
-        $value = str_replace($matches[0],'$$$$$$$$$',$value);
-        return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)self::googleTranslation($value)));
+    public function translateWithParameters($line){
+        preg_match('/:\S+/', $line, $matches);
+        $line = str_replace($matches[0],'$$$$$$$$$',$line);
+        return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)$this->googleTranslation($line)));
     }
 
     public function googleTranslation($line){
