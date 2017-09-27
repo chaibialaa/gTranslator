@@ -32,21 +32,37 @@ class Command extends ConsoleCommand
     }
 
     /**
+     * @var string $from
+     */
+    private $from;
+
+    /**
+     * @var string $to
+     */
+    private $to;
+
+    /**
+     * @var string $line
+     */
+    public $line;
+    
+    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
-        $from = $this->ask('From which language ?', config('app.locale'));
-        $to = $this->ask('To which language ?', 'fr');
 
-        $result = $this->start($to,$from);
+        $this->from =  $this->ask('From which language ?', config('app.locale'));
+        $this->to = $this->ask('To which language ?', config('app.fallback_locale'));
+        
+        $result = $this->translate();
 
-        $this->info($result);
+        return $this->info($result);
     }
 
-    public function start($to, $from){
+    public function translate(){
         $translation = config('gTranslator.directories');
 
         if(empty($translation)){
@@ -56,28 +72,28 @@ class Command extends ConsoleCommand
             $this->info('If you have extra Language files, please consider running \'php artisan vendor:publish\' to edit configuration file');
         }
 
-        $this->iterateTranslationFolders($translation,$from,$to);
+        $this->iterateTranslationFolders($translation);
 
         return 'Translation saved successfully';
     }
 
-    public function iterateTranslationFolders($translation,$from,$to) {
+    public function iterateTranslationFolders($translation) {
         foreach($translation as $key=>$directory){
-            $dir = base_path().'/'.$directory.'/'.$from.'/';
+            $dir = base_path().'/'.$directory.'/'.$this->from.'/';
             $translationFiles = scandir($dir, 1);
 
-            $this->iterateTranslationFiles($translationFiles,$to,$from,$directory);
+            $this->iterateTranslationFiles($translationFiles,$directory);
         }
     }
 
 
-    public function iterateTranslationFiles($translationFiles,$to,$from,$directory){
+    public function iterateTranslationFiles($translationFiles,$directory){
         foreach($translationFiles as $file){
             $fileInfo = pathinfo($file, PATHINFO_EXTENSION);
             $fileName = pathinfo($file, PATHINFO_FILENAME);
             if($fileInfo === 'php'){
-                $translated = $this->iterateTranslationLines($fileName,$to,$from);
-                $translationPath = base_path().'/'.$directory.'/'.$to;
+                $translated = $this->iterateTranslationLines($fileName);
+                $translationPath = base_path().'/'.$directory.'/'.$this->to;
                 if (!is_dir($translationPath)) { mkdir($translationPath, 0700); }
 
                 file_put_contents($translationPath .'/'.$fileName.'.php',
@@ -87,7 +103,7 @@ class Command extends ConsoleCommand
         }
     }
 
-    public function iterateTranslationLines($fileName,$to,$from){
+    public function iterateTranslationLines($fileName){
         $translationQueue = Lang::get($fileName);
         $translated = "";
         $this->info('----- TRANSLATING ' .$fileName . ' -----');
@@ -97,10 +113,10 @@ class Command extends ConsoleCommand
                 $this->error('Unable to translate arrays, passing to next');
             } else {
                 if(strpos($value,':')){
-                    $translatedWord = self::translateWithParameters($value,$to,$from);
+                    $translatedWord = self::translateWithParameters($value);
                     $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                 } else {
-                    $translatedWord = str_replace('\'','\\\'',(string)self::translate($value,$to,$from));
+                    $translatedWord = str_replace('\'','\\\'',(string)self::translate($value));
                     $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                 }
                 sleep(1);
@@ -108,21 +124,21 @@ class Command extends ConsoleCommand
         }
         return $translated;
     }
-    public static function translateWithParameters($value, $to, $from){
+    public static function translateWithParameters($value){
         preg_match('/:\S+/', $value, $matches);
         $value = str_replace($matches[0],'$$$$$$$$$',$value);
-        return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)self::translate($value,$to,$from)));
+        return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)self::googleTranslation($value)));
     }
 
-    public static function translate($word, $to, $from){
+    public function googleTranslation($line){
         $url = "https://translate.google.com/translate_a/single?client=at&dt=t&dt=ld&dt=qca&dt=rm&dt=bd&dj=1&hl=es-ES&ie=UTF-8&oe=UTF-8&inputm=2&otf=2&iid=1dd3b944-fa62-4b55-b330-74909a99969e";
         $fields = array(
-            'sl' => urlencode($from),
-            'tl' => urlencode($to),
-            'q' => urlencode($word)
+            'sl' => urlencode($this->from),
+            'tl' => urlencode($this->to),
+            'q' => urlencode($this->line)
         );
         if(strlen($fields['q'])>=5000)
-            return $word;
+            return $line;
 
         // URL-ify the data for the POST
         $fields_string = "";
