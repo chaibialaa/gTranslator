@@ -48,56 +48,70 @@ class Command extends ConsoleCommand
 
     public function start($to, $from){
         $translation = config('gTranslator.directories');
-        if($translation === null){
-            $translation =  __DIR__.'/../config/gTranslator.php';
+
+        if(empty($translation)){
+            $translation =   [
+                'default' => 'resources/lang',
+            ];
+            $this->info('If you have extra Language files, please consider running \'php artisan vendor:publish\' to edit configuration file');
         }
+
+        $this->iterateTranslationFolders($translation,$from,$to);
+
+        return 'Translation saved successfully';
+    }
+
+    public function iterateTranslationFolders($translation,$from,$to) {
         foreach($translation as $key=>$directory){
             $dir = base_path().'/'.$directory.'/'.$from.'/';
             $translationFiles = scandir($dir, 1);
-            foreach($translationFiles as $file){
-                $fileInfo = pathinfo($file, PATHINFO_EXTENSION);
-                $fileName = pathinfo($file, PATHINFO_FILENAME);
-                if($fileInfo === 'php'){
-                    $translationQueue = Lang::get($fileName);
-                    $translated = "";
-                    $this->info('----- TRANSLATING ' .$fileName . ' -----');
-                    foreach ($translationQueue as $item=>$value){
-                        $this->info('Translating ' . '\'' . $item . '\'');
-                        if(is_array($value)){
-                            foreach ($value as $itemS=>$valueS){
-                                $this->info('Translating ' . '\'' . $itemS . '\'');
-                                if(is_array($valueS)){
-                                    foreach ($valueS as $itemD=>$valueD){
-                                        $this->info('Translating ' . '\'' . $itemD . '\'');
-                                        if(is_array($valueD)){
-                                            $this->error('Unable to translate more than 3 levels arrays, passing to next');
-                                            break;
-                                        }
-                                        $translatedWord = str_replace('\'','\\\'',(string)self::translate($valueD,$to,$from));
-                                        $translated = $translated . '\'' . $itemD . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
-                                        sleep(1);
-                                    }
-                                }
-                                $translatedWord = str_replace('\'','\\\'',(string)self::translate($valueS,$to,$from));
-                                $translated = $translated . '\'' . $itemS . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
-                                sleep(1);
-                            }
-                        }
-                        $translatedWord = str_replace('\'','\\\'',(string)self::translate($value,$to,$from));
-                        $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
-                        sleep(1);
-                    }
 
-                    $translationPath = base_path().'/'.$directory.'/'.$to;
-                    if (!is_dir($translationPath)) { mkdir($translationPath, 0700); }
+            $this->iterateTranslationFiles($translationFiles,$to,$from,$directory);
+        }
+    }
 
-                    file_put_contents($translationPath .'/'.$fileName.'.php',
-                        "<?php ". "\r\n \r\n" ."/* Translation generated with Laravel gTranslator */" . "\r\n \r\n" ." return [ "  . " \r\n \r\n " . $translated . "\r\n \r\n" ."];"
-                    );
-                }
+
+    public function iterateTranslationFiles($translationFiles,$to,$from,$directory){
+        foreach($translationFiles as $file){
+            $fileInfo = pathinfo($file, PATHINFO_EXTENSION);
+            $fileName = pathinfo($file, PATHINFO_FILENAME);
+            if($fileInfo === 'php'){
+                $translated = $this->iterateTranslationLines($fileName,$to,$from);
+                $translationPath = base_path().'/'.$directory.'/'.$to;
+                if (!is_dir($translationPath)) { mkdir($translationPath, 0700); }
+
+                file_put_contents($translationPath .'/'.$fileName.'.php',
+                    "<?php ". "\r\n \r\n" ."/* Translation generated with Laravel gTranslator */" . "\r\n \r\n" ." return [ "  . " \r\n \r\n " . $translated . "\r\n \r\n" ."];"
+                );
             }
         }
-        return 'Translation saved successfully';
+    }
+
+    public function iterateTranslationLines($fileName,$to,$from){
+        $translationQueue = Lang::get($fileName);
+        $translated = "";
+        $this->info('----- TRANSLATING ' .$fileName . ' -----');
+        foreach ($translationQueue as $item=>$value){
+            $this->info('Translating ' . '\'' . $item . '\'');
+            if(is_array($value)){
+                $this->error('Unable to translate arrays, passing to next');
+            } else {
+                if(strpos($value,':')){
+                    $translatedWord = self::translateWithParameters($value,$to,$from);
+                    $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
+                } else {
+                    $translatedWord = str_replace('\'','\\\'',(string)self::translate($value,$to,$from));
+                    $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
+                }
+                sleep(1);
+            }
+        }
+        return $translated;
+    }
+    public static function translateWithParameters($value, $to, $from){
+        preg_match('/:\S+/', $value, $matches);
+        $value = str_replace($matches[0],'$$$$$$$$$',$value);
+        return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)self::translate($value,$to,$from)));
     }
 
     public static function translate($word, $to, $from){
