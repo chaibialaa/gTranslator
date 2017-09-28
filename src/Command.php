@@ -42,11 +42,6 @@ class Command extends ConsoleCommand
     private $to;
 
     /**
-     * @var string $line
-     */
-    public $line;
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -135,7 +130,7 @@ class Command extends ConsoleCommand
         $fields = array(
             'sl' => urlencode($this->from),
             'tl' => urlencode($this->to),
-            'q' => urlencode($this->line)
+            'q' => urlencode($line)
         );
         if(strlen($fields['q'])>=5000)
             return $line;
