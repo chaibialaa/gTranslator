@@ -5,7 +5,7 @@
 Run the command below to install via Composer
 
 ```shell
-composer require chaibi/gtranslator "dev-master"
+composer require chaibi/gtranslator
 ```
 
 Then add this line to your providers in config/app.php :
