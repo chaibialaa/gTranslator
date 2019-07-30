@@ -77,17 +77,18 @@ class Command extends ConsoleCommand
             $dir = base_path().'/'.$directory.'/'.$this->from.'/';
             $translationFiles = scandir($dir, 1);
 
-            $this->iterateTranslationFiles($translationFiles,$directory);
+            $this->iterateTranslationFiles($translationFiles,$directory, $key);
         }
     }
 
 
-    public function iterateTranslationFiles($translationFiles,$directory){
+    public function iterateTranslationFiles($translationFiles,$directory, $key){
         foreach($translationFiles as $file){
             $fileInfo = pathinfo($file, PATHINFO_EXTENSION);
             $fileName = pathinfo($file, PATHINFO_FILENAME);
+
             if($fileInfo === 'php'){
-                $translated = $this->iterateTranslationLines($fileName);
+                $translated = $this->iterateTranslationLines($fileName, $key);
                 $translationPath = base_path().'/'.$directory.'/'.$this->to;
                 if (!is_dir($translationPath)) { mkdir($translationPath, 0700); }
 
@@ -98,10 +99,15 @@ class Command extends ConsoleCommand
         }
     }
 
-    public function iterateTranslationLines($fileName){
-        $translationQueue = Lang::get($fileName);
+    public function iterateTranslationLines($fileName, $key){
+        if($key !== 'default'){
+            $translationQueue = trans($key.'::'.$fileName);
+        } else {
+            $translationQueue = trans($fileName);
+
+        }
         $translated = "";
-        $this->info('----- TRANSLATING ' .$fileName . ' -----');
+        $this->info('----- TRANSLATING ' .$fileName . 'on' . $key . ' -----');
         foreach ($translationQueue as $item=>$value){
             $this->info('Translating ' . '\'' . $item . '\'');
             if(is_array($value)){
