@@ -10,7 +10,7 @@
   ],
   "require": {
     "php": ">=5.5.9",
-    "illuminate/support": "5.x",
+    "illuminate/support": "^5.0|^6.0",
     "illuminate/console": "~5.0"
   },
   "autoload": {
