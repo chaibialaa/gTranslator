@@ -107,7 +107,7 @@ class Command extends ConsoleCommand
 
         }
         $translated = "";
-        $this->info('----- TRANSLATING ' .$fileName . 'on' . $key . ' -----');
+        $this->info('----- TRANSLATING ' .$fileName . ' on ' . $key . ' -----');
         foreach ($translationQueue as $item=>$value){
             $this->info('Translating ' . '\'' . $item . '\'');
             if(is_array($value)){
