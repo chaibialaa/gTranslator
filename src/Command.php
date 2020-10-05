@@ -141,6 +141,7 @@ class Command extends ConsoleCommand
         if(strlen($fields['q'])>=5000)
             return $line;
 
+        // URL-ify the data for the POST
         $fields_string = "";
         foreach ($fields as $key => $value) {
             $fields_string .= $key . '=' . $value . '&';
