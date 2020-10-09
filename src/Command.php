@@ -101,7 +101,12 @@ class Command extends ConsoleCommand
 
     public function iterateTranslationLines($fileName, $key){
 
-        $translationQueue = trans($fileName);
+        if($key !== 'default'){
+            $translationQueue = trans($key.'::'.$fileName);
+        } else {
+            $translationQueue = trans($fileName);
+
+        }
 
         $translated = "";
         $this->info('----- TRANSLATING ' .$fileName . ' on ' . $key . ' -----');
