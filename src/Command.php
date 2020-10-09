@@ -100,12 +100,9 @@ class Command extends ConsoleCommand
     }
 
     public function iterateTranslationLines($fileName, $key){
-        if($key !== 'default'){
-            $translationQueue = trans($key.'::'.$fileName);
-        } else {
-            $translationQueue = trans($fileName);
 
-        }
+        $translationQueue = trans($fileName);
+
         $translated = "";
         $this->info('----- TRANSLATING ' .$fileName . ' on ' . $key . ' -----');
         foreach ($translationQueue as $item=>$value){
@@ -126,7 +123,7 @@ class Command extends ConsoleCommand
         return $translated;
     }
     public function translateWithParameters($line){
-        preg_match('/:\S+/', $line, $matches);
+        preg_match('/:([^\s]+)/', $line, $matches);
         $line = str_replace($matches[0],'$$$$$$$$$',$line);
         return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)$this->googleTranslation($line)));
     }
