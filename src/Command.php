@@ -124,6 +124,7 @@ class Command extends ConsoleCommand
     }
     public function translateWithParameters($line){
         preg_match('/:([^\s]+)/', $line, $matches);
+        // changed logic
         $line = str_replace($matches[0],'$$$$$$$$$',$line);
         return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)$this->googleTranslation($line)));
     }
