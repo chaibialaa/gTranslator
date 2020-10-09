@@ -115,8 +115,10 @@ class Command extends ConsoleCommand
             if(is_array($value)){
                 $this->error('Unable to translate arrays, passing to next');
             } else {
-                if(strpos($value,':')){
-                    $translatedWord = $this->translateWithParameters($value);
+                preg_match('/:([^\s]+)/', $value, $matches);
+
+                if(isset($matches[0])){
+                    $translatedWord = $this->translateWithParameters($value, $matches);
                     $translated = $translated . '\'' . $item . '\'' . ' => ' .'\'' .$translatedWord .'\', ' . "\r\n";
                 } else {
                     $translatedWord = str_replace('\'','\\\'',(string)$this->googleTranslation($value));
@@ -127,9 +129,7 @@ class Command extends ConsoleCommand
         }
         return $translated;
     }
-    public function translateWithParameters($line){
-        preg_match('/:([^\s]+)/', $line, $matches);
-        // changed logic
+    public function translateWithParameters($line, $matches){
         $line = str_replace($matches[0],'$$$$$$$$$',$line);
         return str_replace('$$$$$$$$$', $matches[0], str_replace('\'','\\\'',(string)$this->googleTranslation($line)));
     }
